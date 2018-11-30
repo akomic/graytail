@@ -106,7 +106,7 @@ func (log *Logs) Tail() {
 }
 
 func colorPicker() func(string) string {
-	noColor := viper.GetBool("noColor")
+	noColor := viper.GetBool("no-color")
 
 	arrayColors := []func(...interface{}) string{
 		color.New(color.FgRed).SprintFunc(),
@@ -157,7 +157,7 @@ func NewMessage(payload map[string]interface{}) (m Message) {
 }
 
 func (m *Message) setTimestamp() {
-	localTime := viper.GetBool("localTime")
+	localTime := viper.GetBool("local-time")
 
 	var timestamp time.Time
 
@@ -209,10 +209,17 @@ func extractFilterKeys() {
 }
 
 func (m *Message) setIdent() {
+	configIdents := viper.GetStringSlice("ident")
 	verbose := viper.GetBool("verbose")
 	debug := viper.GetBool("debug")
 
 	idents := [][]string{}
+
+	for _, configIdent := range configIdents {
+		configIdent = strings.Replace(configIdent, " ", "", -1)
+		idents = append(idents, strings.Split(configIdent, ","))
+	}
+
 	idents = append(idents, []string{"container_name", "stack_name"})
 	if verbose {
 		idents = append(idents, []string{"container_name", "pod_name", "namespace_name"})
@@ -275,7 +282,7 @@ func (m *Message) setMessage() {
 }
 
 func (m *Message) Print() {
-	rawOutput := viper.GetBool("rawOutput")
+	rawOutput := viper.GetBool("raw-output")
 	debug := viper.GetBool("debug")
 
 	line := make([]string, 0, 3)
@@ -298,7 +305,7 @@ func (m *Message) Print() {
 }
 
 func (m *Message) parse() {
-	rawOutput := viper.GetBool("rawOutput")
+	rawOutput := viper.GetBool("raw-output")
 	debug := viper.GetBool("debug")
 
 	if rawOutput || debug {

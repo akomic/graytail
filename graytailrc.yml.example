@@ -1,0 +1,15 @@
+---
+uri: ws://MyToken@127.0.0.1:20221/filter
+
+# Logs are displayed in the following format:
+# <timestamp> <ident> <message>
+# <timestamp> - If incoming message is missing timestamp field local one is generated
+# <ident>     - Ident is combination of several fields found in incoming message.
+#               Since messages have variable fields below is the list of preferred field combinations.
+#               Graytail is going through the list until the field combination is present.
+# <message>   - The following fields are displayed as message: message, MESSAGE, short_message, SHORT_MESSAGE
+
+ident:
+    - container_name, namespace_name
+    - host
+    - source
