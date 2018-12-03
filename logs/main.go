@@ -10,6 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
+	"math"
 	"strings"
 )
 
@@ -164,13 +165,13 @@ func (m *Message) setTimestamp() {
 	if m.Payload["timestamp"] != nil {
 		switch m.Payload["timestamp"].(type) {
 		case float64:
-			timestamp, _ = time.Parse(time.RFC3339Nano, fmt.Sprintf("%f", m.Payload["timestamp"].(float64)))
+			// timestamp, _ = time.Parse(time.RFC3339Nano, fmt.Sprintf("%f", m.Payload["timestamp"].(float64)))
+			// timestamp = m.Payload["timestamp"].(float64)
+			sec, dec := math.Modf(m.Payload["timestamp"].(float64))
+			timestamp = time.Unix(int64(sec), int64(dec*(1e9)))
 		default:
 			timestamp, _ = time.Parse(time.RFC3339Nano, m.Payload["timestamp"].(string))
 		}
-		// timestamp, _ = time.Parse(time.RFC3339Nano, m.Payload["timestamp"].(string))
-	} else if m.Payload["created"] != nil {
-		timestamp, _ = time.Parse(time.RFC3339Nano, m.Payload["created"].(string))
 	} else {
 		timestamp = time.Now()
 	}
@@ -178,7 +179,7 @@ func (m *Message) setTimestamp() {
 	if localTime {
 		m.Timestamp = fmt.Sprintf("%s", timestamp.In(time.Now().Location()).Format("2006-01-02 15:04:05.000"))
 	} else {
-		m.Timestamp = fmt.Sprintf("%s", time.Now().UTC().Format("2006-01-02 15:04:05.000"))
+		m.Timestamp = fmt.Sprintf("%s", timestamp.UTC().Format("2006-01-02 15:04:05.000"))
 	}
 }
 
@@ -267,7 +268,7 @@ func (m *Message) setIdent() {
 }
 
 func (m *Message) setMessage() {
-	if m.Payload["message"] != nil {
+	if m.Payload["message"] != nil && m.Payload["message"] != "(no message)" {
 		m.Message = strings.TrimSpace(m.Payload["message"].(string))
 	} else if m.Payload["MESSAGE"] != nil {
 		m.Message = strings.TrimSpace(m.Payload["MESSAGE"].(string))
